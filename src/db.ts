@@ -7,7 +7,7 @@ import {
   updateDoc,
   collection,
 } from "firebase/firestore";
-import { GameData } from "./GameData";
+import { GameData, PlayerData, PlayableKanji } from "./GameData";
 import testData from "./testData.json";
 
 export async function createGame(
@@ -44,10 +44,11 @@ export async function createGame(
   return Promise.reject("Error creating game");
 }
 
+// Todo: if player already exists in the game, return player data
 export async function joinGame(
   gameID: string,
   playerUID: string
-): Promise<boolean | string> {
+): Promise<PlayerData | string> {
   const gameRef = doc(db, "games", gameID);
   const docSnap = await getDoc(gameRef);
   if (docSnap.exists()) {
@@ -63,7 +64,7 @@ export async function joinGame(
     let initialCards = docSnap.data()?.intialCards;
 
     // set player cards to random cards from initialCards
-    let playerCards: any[] = [];
+    let playerCards: PlayableKanji[] = [];
     while (playerCards.length < rowByCol) {
       let randomIndex = Math.floor(Math.random() * initialCards.length);
       let temp = {
@@ -76,6 +77,11 @@ export async function joinGame(
       initialCards.splice(randomIndex, 1);
     }
 
+    let playerData: PlayerData = {
+      playerUID: playerUID,
+      cards: playerCards,
+    };
+
     const playerRef = doc(db, "games", gameID, "players", playerUID);
     await setDoc(playerRef, {
       playerUID: playerUID,
@@ -83,7 +89,8 @@ export async function joinGame(
     }).catch(() => {
       return Promise.reject("Error joining game");
     });
-    return true;
+
+    return playerData;
   }
 
   return Promise.reject("Error joining game");
