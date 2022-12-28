@@ -64,14 +64,10 @@ function App() {
   }
 
   // If there is an error, display it
-  if (error) {
-    return <div>There was an error</div>;
-  }
+  if (error) return <div>There was an error</div>;
 
   // If the user is not logged in, display a loading message
-  if (!userUID) {
-    return <div>Loading you user id...</div>;
-  }
+  if (!userUID) return <div>Loading you user id...</div>;
 
   // If the user is logged in, but not in a game, display the join/create game buttons
   if (!gameID) {
@@ -101,7 +97,6 @@ function App() {
         }}
       ></Board>
 
-      {/* Test Methods, will be erased later */}
       <div>userUID: {userUID}</div>
       <div>gameID: {gameID}</div>
     </div>

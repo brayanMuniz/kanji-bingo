@@ -1,4 +1,5 @@
 import { Cell } from "./Cell";
+import Grid from "@mui/material/Grid";
 import { PlayableKanji } from "./GameData";
 
 export type BoardProps = {
@@ -21,7 +22,29 @@ export const Board = (props: BoardProps) => {
         ></Cell>
       );
     }
-    rows.push(<div className="row">{cells}</div>);
+
+    rows.push(
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+      >
+        {cells}
+      </Grid>
+    );
   }
-  return <div className="board">{rows}</div>;
+
+  return (
+    <div className="board">
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+      >
+        {rows}
+      </Grid>
+    </div>
+  );
 };
