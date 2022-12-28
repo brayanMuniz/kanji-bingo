@@ -5,21 +5,20 @@ import { auth } from "./firebase";
 
 import { Board } from "./Board";
 import { createGame, joinGame, updateSelectedCard } from "./db";
-import { GameData } from "./GameData";
-
-// This is the main component of the app. It renders the Board component.
+import { GameData, PlayerData } from "./GameData";
 
 function App() {
   const [userUID, setUID] = React.useState<string | null>(null);
+  const [playerData, setPlayerData] = React.useState<PlayerData | null>(null);
   const [gameID, setGameID] = React.useState<string | null>(null);
   const [error, setError] = React.useState<boolean>(false);
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       setUID(user.uid);
       console.log("User is signed in", user.uid);
     } else {
-      signInAnonymously(auth)
+      await signInAnonymously(auth)
         .then((data) => {
           setUID(data.user.uid);
         })
@@ -45,26 +44,23 @@ function App() {
 
   async function joinGameBtn(gameID: string) {
     if (userUID && gameID)
-      await joinGame(gameID, userUID).then(() => {
-        setGameID(gameID);
-        console.log("Joined game", gameID);
-      });
+      await joinGame(gameID, userUID).then(
+        (playerData: PlayerData | string) => {
+          if (typeof playerData === "string") {
+            return;
+          }
+          setGameID(gameID);
+          setPlayerData(playerData);
+          console.log("Joined game", gameID);
+        }
+      );
   }
 
-  async function updateCard() {
+  async function updateCard(cardId: number) {
     if (userUID && gameID)
-      await updateSelectedCard(gameID, userUID, 452)
-        .then(() => {
-          console.log("Updated card");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    else if (!gameID) {
-      console.log("No gameID");
-    } else {
-      console.log("No userUID");
-    }
+      await updateSelectedCard(gameID, userUID, cardId).catch((err) => {
+        console.log(err);
+      });
   }
 
   // If there is an error, display it
@@ -74,28 +70,40 @@ function App() {
 
   // If the user is not logged in, display a loading message
   if (!userUID) {
-    return <div>Loading...</div>;
+    return <div>Loading you user id...</div>;
   }
-  // If the user is logged in, render the Board component
 
+  // If the user is logged in, but not in a game, display the join/create game buttons
+  if (!gameID) {
+    return (
+      <div className="App">
+        Join a game or create a new one
+        <button onClick={startGame}>Create Game</button>
+        <button onClick={() => joinGameBtn("zoJBkgGuu3npGxZQVitN")}>
+          Join Test Game
+        </button>
+      </div>
+    );
+  }
+
+  if (!playerData) {
+    return <div>Loading yoru data...</div>;
+  }
+
+  // If the user is logged in, render the Board component
   return (
     <div className="App">
       <Board
-        rows={5}
-        columns={5}
-        onCellClick={(row, col) => {
-          console.log(`Clicked on row ${row} and column ${col}`);
+        kanjiData={playerData.cards}
+        onCellClick={(row, col, cardData) => {
+          // Todo: add a method to update cards border colors
+          updateCard(cardData.id);
         }}
       ></Board>
+
+      {/* Test Methods, will be erased later */}
       <div>userUID: {userUID}</div>
       <div>gameID: {gameID}</div>
-      <button onClick={startGame}>Create Game</button>
-
-      <button onClick={() => joinGameBtn("zoJBkgGuu3npGxZQVitN")}>
-        Join Test Game
-      </button>
-
-      <button onClick={updateCard}>Update Card Test</button>
     </div>
   );
 }

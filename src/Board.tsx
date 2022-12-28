@@ -1,43 +1,27 @@
 import { Cell } from "./Cell";
+import { PlayableKanji } from "./GameData";
 
 export type BoardProps = {
-  rows: number;
-  columns: number;
-  onCellClick: (row: number, column: number) => void;
+  onCellClick: (row: number, column: number, cellData: PlayableKanji) => void;
+  kanjiData: PlayableKanji[];
 };
 
 export const Board = (props: BoardProps) => {
   const rows = [];
-  for (let i = 0; i < props.rows; i++) {
-    rows.push(
-      <Row
-        key={i}
-        columns={props.columns}
-        onCellClick={props.onCellClick}
-        row={i}
-      />
-    );
+  for (let i = 0; i < 5; i++) {
+    const cells = [];
+    for (let j = 0; j < 5; j++) {
+      cells.push(
+        <Cell
+          key={i * 5 + j}
+          onCellClick={props.onCellClick}
+          row={i}
+          column={j}
+          cellData={props.kanjiData[i * 5 + j]}
+        ></Cell>
+      );
+    }
+    rows.push(<div className="row">{cells}</div>);
   }
   return <div className="board">{rows}</div>;
-};
-
-export type RowProps = {
-  columns: number;
-  onCellClick: (row: number, column: number) => void;
-  row: number;
-};
-
-export const Row = (props: RowProps) => {
-  const cells = [];
-  for (let i = 0; i < props.columns; i++) {
-    cells.push(
-      <Cell
-        key={i}
-        onCellClick={props.onCellClick}
-        row={props.row}
-        column={i}
-      />
-    );
-  }
-  return <div className="row">{cells}</div>;
 };
