@@ -1,3 +1,4 @@
+import React from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import { PlayableKanji } from "./GameData";
@@ -9,24 +10,48 @@ export type CellProps = {
   cellData: PlayableKanji;
 };
 
+// ? If I am going to use the primary only, just save the primaries ?
 export const Cell = (props: CellProps) => {
+  const [selected, setSelected] = React.useState<boolean>(false);
+  let displayText = "";
+  if (props.cellData) {
+    let meaningCorrect = "";
+    let readingCorrect = "";
+
+    props.cellData.meanings.forEach((meaning) => {
+      if (meaning.accepted_answer && meaning.primary) {
+        meaningCorrect = meaning.meaning;
+      }
+    });
+
+    props.cellData.readings.forEach((reading) => {
+      if (reading.accepted_answer && reading.primary) {
+        readingCorrect = reading.reading;
+      }
+    });
+
+    displayText = meaningCorrect + " " + readingCorrect;
+  }
+
+  function toggleClick(row: number, column: number, cellData: PlayableKanji) {
+    props.onCellClick(row, column, cellData);
+    setSelected(!selected);
+  }
+
   return (
     <Grid item xs={2}>
       <Box
         sx={{
           width: "100%",
           height: "100%",
-          backgroundColor: "primary.dark",
+          backgroundColor: selected ? "#6fbf73" : "primary.main",
           "&:hover": {
-            backgroundColor: "primary.main",
             opacity: [0.9, 0.8, 0.7],
           },
         }}
-        onClick={() =>
-          props.onCellClick(props.row, props.column, props.cellData)
-        }
+        onClick={() => toggleClick(props.row, props.column, props.cellData)}
       >
-        {props.cellData.id}
+        {displayText}
       </Box>
     </Grid>
   );
