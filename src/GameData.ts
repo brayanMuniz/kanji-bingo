@@ -4,6 +4,18 @@ interface KanjiData {
   hiragana: string;
 }
 
+export interface PlayableKanji {
+  id: number;
+  isSelected: boolean;
+  meanings: any[];
+  readings: any[];
+}
+
+export interface PlayerData {
+  playerUID: string;
+  cards: PlayableKanji[];
+}
+
 export interface GameData {
   gameID: string;
   rows: number;
