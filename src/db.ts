@@ -89,3 +89,33 @@ export async function joinGame(
   return Promise.reject("Error joining game");
 }
 
+export async function updateSelectedCard(
+  gameID: string,
+  playerUID: string,
+  cardId: number
+) {
+  const playerRef = doc(db, "games", gameID, "players", playerUID);
+  const docSnap = await getDoc(playerRef);
+  if (docSnap.exists()) {
+    let playerCards: any[] = docSnap.data()?.cards;
+    let selectedCard = playerCards.find((card) => card.id === cardId);
+    if (!selectedCard)
+      return Promise.reject(
+        "Error updating selected card, card does not exist"
+      );
+
+    selectedCard.isSelected = !selectedCard.isSelected;
+    playerCards = playerCards.map((card) =>
+      card.id === cardId ? selectedCard : card
+    );
+
+    await updateDoc(playerRef, {
+      cards: playerCards,
+    }).catch(() => {
+      return Promise.reject("Error updating selected card");
+    });
+  } else
+    return Promise.reject(
+      "Error updating selected card, player document does not exist"
+    );
+}
