@@ -26,6 +26,7 @@ export async function createGame(
     hostUID: hostUID,
     players: [],
     intialCards: initialGameData,
+    playedCards: [], // ids only, refer back to intialCards
     gameStarted: false,
   });
 
@@ -48,14 +49,26 @@ export async function createGame(
 export async function joinGame(
   gameID: string,
   playerUID: string
-): Promise<PlayerData | string> {
+): Promise<[GameData, PlayerData]> {
   const gameRef = doc(db, "games", gameID);
   const docSnap = await getDoc(gameRef);
   if (docSnap.exists()) {
+    const gameData: GameData = {
+      gameID: gameID,
+      rows: docSnap.data().row,
+      cols: docSnap.data().col,
+      hostUID: docSnap.data().hostUID,
+      intialCards: docSnap.data().intialCards,
+      playedCards: docSnap.data().playedCards, // ids only, refer back to intialCards
+      players: docSnap.data().players,
+      gameStarted: docSnap.data().gameStarted,
+    };
+
     // Push playerUID to players array
-    let players: Array<string> = docSnap.data()?.players;
+    let players: Array<string> = gameData.players;
     players.push(playerUID);
     let uniquePlayers = [...new Set(players)];
+    gameData.players = uniquePlayers;
     await updateDoc(gameRef, {
       players: uniquePlayers,
     });
@@ -90,7 +103,7 @@ export async function joinGame(
       return Promise.reject("Error joining game");
     });
 
-    return playerData;
+    return [gameData, playerData];
   }
 
   return Promise.reject("Error joining game");

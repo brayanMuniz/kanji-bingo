@@ -1,4 +1,4 @@
-interface KanjiData {
+export interface KanjiData {
   kanji: string;
   id: number;
   hiragana: string;
@@ -16,13 +16,20 @@ export interface PlayerData {
   cards: PlayableKanji[];
 }
 
+export interface initialKanjiData {
+  characters: string;
+  id: number;
+  meanings: any[];
+  readings: any[];
+}
+
 export interface GameData {
   gameID: string;
   rows: number;
   cols: number;
   hostUID: string;
-  intialCards: KanjiData[];
-  playedCards: KanjiData[];
+  intialCards: initialKanjiData[];
+  playedCards: number[]; // IDs of played cards
   players: string[];
   gameStarted: boolean;
 }

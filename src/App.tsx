@@ -4,13 +4,20 @@ import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 
 import { Board } from "./Board";
+import { GameDisplay } from "./GameDisplay";
 import { createGame, joinGame, updateSelectedCard } from "./db";
 import { GameData, PlayerData } from "./GameData";
 
 function App() {
+  // User data
   const [userUID, setUID] = React.useState<string | null>(null);
   const [playerData, setPlayerData] = React.useState<PlayerData | null>(null);
+
+  // Game data
   const [gameID, setGameID] = React.useState<string | null>(null);
+  const [gameData, setGameData] = React.useState<GameData | null>(null);
+
+  // Error state
   const [error, setError] = React.useState<boolean>(false);
 
   onAuthStateChanged(auth, async (user) => {
@@ -33,6 +40,7 @@ function App() {
       await createGame(5, 5, userUID)
         .then(async (res: GameData) => {
           setGameID(res.gameID);
+          setGameData(res);
           await joinGame(res.gameID, userUID).then(() => {
             console.log("Joined game", res.gameID);
           });
@@ -44,16 +52,12 @@ function App() {
 
   async function joinGameBtn(gameID: string) {
     if (userUID && gameID)
-      await joinGame(gameID, userUID).then(
-        (playerData: PlayerData | string) => {
-          if (typeof playerData === "string") {
-            return;
-          }
-          setGameID(gameID);
-          setPlayerData(playerData);
-          console.log("Joined game", gameID);
-        }
-      );
+      await joinGame(gameID, userUID).then((res: [GameData, PlayerData]) => {
+        setGameID(gameID);
+        setGameData(res[0]);
+        setPlayerData(res[1]);
+        console.log("Joined game", gameID);
+      });
   }
 
   async function updateCard(cardId: number) {
@@ -70,12 +74,12 @@ function App() {
   if (!userUID) return <div>Loading you user id...</div>;
 
   // If the user is logged in, but not in a game, display the join/create game buttons
-  if (!gameID) {
+  if (!gameID && !gameData) {
     return (
       <div className="App">
         Join a game or create a new one
         <button onClick={startGame}>Create Game</button>
-        <button onClick={() => joinGameBtn("zoJBkgGuu3npGxZQVitN")}>
+        <button onClick={() => joinGameBtn("Dm0l7uV7buyRVpV6RDJV")}>
           Join Test Game
         </button>
       </div>
@@ -87,20 +91,31 @@ function App() {
   }
 
   // If the user is logged in, render the Board component
-  return (
-    <div className="App">
-      <Board
-        kanjiData={playerData.cards}
-        onCellClick={(row, col, cardData) => {
-          // Todo: add a method to update cards border colors
-          updateCard(cardData.id);
-        }}
-      ></Board>
+  if (gameID && gameData && playerData)
+    return (
+      <div className="App">
+        <GameDisplay
+          gameID={gameID}
+          hostUID={gameData.hostUID}
+          intialCards={gameData.intialCards}
+          playedCards={gameData.playedCards}
+          onCellClick={(type) => {
+            console.log(type);
+          }}
+        ></GameDisplay>
 
-      <div>userUID: {userUID}</div>
-      <div>gameID: {gameID}</div>
-    </div>
-  );
+        <Board
+          kanjiData={playerData.cards}
+          onCellClick={(row, col, cardData) => {
+            updateCard(cardData.id);
+          }}
+        ></Board>
+
+        <div>userUID: {userUID}</div>
+        <div>gameID: {gameID}</div>
+      </div>
+    );
+  return <div>Something went wrong</div>;
 }
 
 export default App;
