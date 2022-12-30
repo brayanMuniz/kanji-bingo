@@ -10,6 +10,7 @@ import {
 import { GameData, PlayerData, PlayableKanji } from "./GameData";
 import testData from "./testData.json";
 
+// Game functions
 export async function createGame(
   row: number,
   col: number,
@@ -45,7 +46,6 @@ export async function createGame(
   return Promise.reject("Error creating game");
 }
 
-// Todo: if player already exists in the game, return player data
 export async function joinGame(
   gameID: string,
   playerUID: string
@@ -109,6 +109,21 @@ export async function joinGame(
   return Promise.reject("Error joining game");
 }
 
+export async function updatePlayedCards(gameID: string, newId: number) {
+  const gameRef = doc(db, "games", gameID);
+  const docSnap = await getDoc(gameRef);
+  if (docSnap.exists()) {
+    let playedCards: any[] = docSnap.data()?.playedCards;
+    playedCards.push(newId);
+    await updateDoc(gameRef, {
+      playedCards: playedCards,
+    }).catch(() => {
+      return Promise.reject("Error updating played cards");
+    });
+  }
+}
+
+// User functions
 export async function updateSelectedCard(
   gameID: string,
   playerUID: string,
