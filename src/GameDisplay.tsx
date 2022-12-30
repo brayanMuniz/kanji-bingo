@@ -4,13 +4,12 @@ import React from "react";
 export type GameDisplayProps = {
   gameID: string;
   hostUID: string;
+  userUID: string;
   intialCards: initialKanjiData[];
   playedCards: number[];
-  // Todo: update and return next id to display
   onChangeDisplayClick: (type: "Play Next" | "Show Previous") => void;
 };
 
-// Todo: fix this
 export const GameDisplay = (props: GameDisplayProps) => {
   const [currentDisplay, setCurrentDisplay] = React.useState<string>("");
   const [currentCardIdx, setCurrentCardIdx] = React.useState<number>(0);
@@ -32,6 +31,10 @@ export const GameDisplay = (props: GameDisplayProps) => {
       setCurrentCardIdx(props.playedCards.length - 1);
       setCurrentDisplay(selectedCard.characters);
     }
+  }
+
+  function isUserHostUser(): boolean {
+    return props.hostUID === props.userUID;
   }
 
   function onShowPreviousClick() {
@@ -96,11 +99,11 @@ export const GameDisplay = (props: GameDisplayProps) => {
 
   return (
     <div>
-      {currentCardIdx} ---
-      {playedCards}
-      <button onClick={onShowPreviousClick}>Previous</button>
+      {isUserHostUser() && (
+        <button onClick={onShowPreviousClick}>Previous</button>
+      )}
       <h1>{currentDisplay}</h1>
-      <button onClick={onNextClick}>Next</button>
+      {isUserHostUser() && <button onClick={onNextClick}>Next</button>}
     </div>
   );
 };

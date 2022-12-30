@@ -99,6 +99,7 @@ function App() {
           hostUID={gameData.hostUID}
           intialCards={gameData.intialCards}
           playedCards={gameData.playedCards}
+          userUID={userUID}
           onChangeDisplayClick={(type) => {
             console.log(type);
           }}
