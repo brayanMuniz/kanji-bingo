@@ -99,7 +99,7 @@ function App() {
           hostUID={gameData.hostUID}
           intialCards={gameData.intialCards}
           playedCards={gameData.playedCards}
-          onCellClick={(type) => {
+          onChangeDisplayClick={(type) => {
             console.log(type);
           }}
         ></GameDisplay>
