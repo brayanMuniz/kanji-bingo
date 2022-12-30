@@ -1,5 +1,6 @@
-import { initialKanjiData } from "./GameData";
 import React from "react";
+import { updatePlayedCards } from "./db";
+import { initialKanjiData } from "./GameData";
 
 export type GameDisplayProps = {
   gameID: string;
@@ -23,13 +24,20 @@ export const GameDisplay = (props: GameDisplayProps) => {
       setCurrentCardIdx(0);
       setPlayedCards([selectedCard.id]);
       setCurrentDisplay(selectedCard.characters);
+      // updatePlayedCards(props.gameID, selectedCard.id);
     } else {
-      const selectedCard: initialKanjiData =
-        props.intialCards[props.playedCards[props.playedCards.length - 1]];
+      const selectedCardId: number =
+        props.playedCards[props.playedCards.length - 1];
+      let currentDisplay: string = "";
+      props.intialCards.forEach((card) => {
+        if (card.id === selectedCardId) {
+          currentDisplay = card.characters;
+        }
+      });
 
       setPlayedCards(props.playedCards);
       setCurrentCardIdx(props.playedCards.length - 1);
-      setCurrentDisplay(selectedCard.characters);
+      setCurrentDisplay(currentDisplay);
     }
   }
 
@@ -37,7 +45,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
     return props.hostUID === props.userUID;
   }
 
-  function onShowPreviousClick() {
+  function onShowPreviousClick(): void {
     let currentIdx: number = currentCardIdx;
     if (currentIdx > 0) currentIdx--;
     setCurrentCardIdx(currentIdx);
@@ -54,7 +62,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
     props.onChangeDisplayClick("Show Previous");
   }
 
-  function onNextClick() {
+  function onNextClick(): void {
     let currentIdx: number = currentCardIdx;
     currentIdx++;
     setCurrentCardIdx(currentIdx);
@@ -78,8 +86,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
       let playedCardsCopy = playedCards;
       playedCardsCopy.push(idNotSelectedYet);
       setPlayedCards(playedCardsCopy);
-
-      console.log(playedCardsCopy, "playedCards");
+      updatePlayedCards(props.gameID, idNotSelectedYet);
       console.log("Added brand new card");
     } else {
       let nextId: number = playedCards[currentIdx];
