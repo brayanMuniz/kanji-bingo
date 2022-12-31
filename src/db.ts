@@ -76,6 +76,17 @@ export async function joinGame(
     let rowByCol: number = docSnap.data()?.rows * docSnap.data()?.cols;
     let initialCards = docSnap.data()?.intialCards;
 
+    // if player aleady exists, return player data
+    const playerRef = doc(db, "games", gameID, "players", playerUID);
+    const playerDocSnap = await getDoc(playerRef);
+    if (playerDocSnap.exists()) {
+      const playerData: PlayerData = {
+        playerUID: playerUID,
+        cards: playerDocSnap.data()?.cards,
+      };
+      return [gameData, playerData];
+    }
+
     // set player cards to random cards from initialCards
     let playerCards: PlayableKanji[] = [];
     while (playerCards.length < rowByCol) {
@@ -90,12 +101,11 @@ export async function joinGame(
       initialCards.splice(randomIndex, 1);
     }
 
-    let playerData: PlayerData = {
+    const playerData: PlayerData = {
       playerUID: playerUID,
       cards: playerCards,
     };
 
-    const playerRef = doc(db, "games", gameID, "players", playerUID);
     await setDoc(playerRef, {
       playerUID: playerUID,
       cards: playerCards,
