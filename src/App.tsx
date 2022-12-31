@@ -6,7 +6,7 @@ import { auth } from "./firebase";
 import { Board } from "./Board";
 import { GameDisplay } from "./GameDisplay";
 import { createGame, joinGame, updateSelectedCard } from "./db";
-import { GameData, PlayerData } from "./GameData";
+import { GameData, PlayerData, PlayableKanji } from "./GameData";
 
 function App() {
   // User data
@@ -57,14 +57,35 @@ function App() {
         setGameData(res[0]);
         setPlayerData(res[1]);
         console.log("Joined game", gameID);
+        console.log("Player data", res[1]);
       });
   }
 
-  async function updateCard(cardId: number) {
-    if (userUID && gameID)
-      await updateSelectedCard(gameID, userUID, cardId).catch((err) => {
+  async function updateCard(cardData: PlayableKanji) {
+    if (userUID && gameID && playerData) {
+      // Update the local data
+      let newPlayerData: PlayerData = playerData;
+      newPlayerData.cards.forEach((card) => {
+        if (card.id === cardData.id) {
+          card.isSelected = !card.isSelected;
+        }
+      });
+      setPlayerData(newPlayerData);
+
+      // Update the database
+      await updateSelectedCard(gameID, userUID, cardData.id).catch((err) => {
         console.log(err);
       });
+
+      // Check if the user has won
+      let allClicked = true;
+      newPlayerData.cards.forEach((card) => {
+        if (!card.isSelected) allClicked = false;
+      });
+      if (allClicked) console.log("you won");
+
+      // Todo: check if all the users answers are correct and update the game state
+    }
   }
 
   // If there is an error, display it
@@ -108,7 +129,7 @@ function App() {
         <Board
           kanjiData={playerData.cards}
           onCellClick={(row, col, cardData) => {
-            updateCard(cardData.id);
+            updateCard(cardData);
           }}
         ></Board>
 

@@ -12,7 +12,9 @@ export type CellProps = {
 
 // ? If I am going to use the primary only, just save the primaries ?
 export const Cell = (props: CellProps) => {
-  const [selected, setSelected] = React.useState<boolean>(false);
+  const [selected, setSelected] = React.useState<boolean>(
+    props.cellData.isSelected
+  );
   let displayText = "";
   if (props.cellData) {
     let meaningCorrect = "";
