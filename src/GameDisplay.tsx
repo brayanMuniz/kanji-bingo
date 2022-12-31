@@ -28,12 +28,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
     } else {
       const selectedCardId: number =
         props.playedCards[props.playedCards.length - 1];
-      let currentDisplay: string = "";
-      props.intialCards.forEach((card) => {
-        if (card.id === selectedCardId) {
-          currentDisplay = card.characters;
-        }
-      });
+      let currentDisplay: string = getDisplayFromCardId(selectedCardId);
 
       setPlayedCards(props.playedCards);
       setCurrentCardIdx(props.playedCards.length - 1);
@@ -45,20 +40,23 @@ export const GameDisplay = (props: GameDisplayProps) => {
     return props.hostUID === props.userUID;
   }
 
+  function getDisplayFromCardId(id: number): string {
+    let display: string = "";
+    props.intialCards.forEach((card) => {
+      if (card.id === id) {
+        display = card.characters;
+      }
+    });
+    return display;
+  }
+
   function onShowPreviousClick(): void {
     let currentIdx: number = currentCardIdx;
     if (currentIdx > 0) currentIdx--;
     setCurrentCardIdx(currentIdx);
 
     let previousId: number = playedCards[currentIdx];
-
-    let newDisplay: string = "";
-    props.intialCards.forEach((card) => {
-      if (card.id === previousId) {
-        newDisplay = card.characters;
-      }
-    });
-    setCurrentDisplay(newDisplay);
+    setCurrentDisplay(getDisplayFromCardId(previousId));
     props.onChangeDisplayClick("Show Previous");
   }
 
@@ -76,11 +74,9 @@ export const GameDisplay = (props: GameDisplayProps) => {
         if (!props.playedCards.includes(selectedCard.id))
           idNotSelectedYet = selectedCard.id;
       }
-      props.intialCards.forEach((card) => {
-        if (card.id === idNotSelectedYet) {
-          setCurrentDisplay(card.characters);
-        }
-      });
+
+      let newDisplay: string = getDisplayFromCardId(idNotSelectedYet);
+      setCurrentDisplay(newDisplay);
 
       // Add card to playedCards
       let playedCardsCopy = playedCards;
@@ -91,14 +87,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
     } else {
       let nextId: number = playedCards[currentIdx];
       console.log(nextId, "nextId");
-
-      let newDisplay: string = "";
-      props.intialCards.forEach((card) => {
-        if (card.id === nextId) {
-          newDisplay = card.characters;
-        }
-      });
-      setCurrentDisplay(newDisplay);
+      setCurrentDisplay(getDisplayFromCardId(nextId));
     }
 
     props.onChangeDisplayClick("Play Next");
