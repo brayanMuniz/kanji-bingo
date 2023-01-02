@@ -1,6 +1,6 @@
 import React from "react";
 import { updatePlayedCards } from "./db";
-import { initialKanjiData } from "./GameData";
+import { initialKanjiData } from "./interfaces/GameData";
 
 export type GameDisplayProps = {
   gameID: string;

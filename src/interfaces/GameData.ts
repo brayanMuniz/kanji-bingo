@@ -23,6 +23,11 @@ export interface initialKanjiData {
   readings: any[];
 }
 
+export interface PlayerPoints {
+  playerUID: string;
+  points: number;
+}
+
 export interface GameData {
   gameID: string;
   rows: number;
@@ -30,6 +35,6 @@ export interface GameData {
   hostUID: string;
   intialCards: initialKanjiData[];
   playedCards: number[]; // IDs of played cards
-  players: string[];
+  players: PlayerPoints[];
   gameStarted: boolean;
 }

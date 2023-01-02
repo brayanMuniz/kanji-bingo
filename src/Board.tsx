@@ -1,6 +1,6 @@
 import { Cell } from "./Cell";
 import Grid from "@mui/material/Grid";
-import { PlayableKanji } from "./GameData";
+import { PlayableKanji } from "./interfaces/GameData";
 
 export type BoardProps = {
   onCellClick: (row: number, column: number, cellData: PlayableKanji) => void;

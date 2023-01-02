@@ -6,7 +6,7 @@ import { auth } from "./firebase";
 import { Board } from "./Board";
 import { GameDisplay } from "./GameDisplay";
 import { createGame, joinGame, updateSelectedCard } from "./db";
-import { GameData, PlayerData, PlayableKanji } from "./GameData";
+import { GameData, PlayerData, PlayableKanji } from "./interfaces/GameData";
 
 function App() {
   // User data
@@ -91,14 +91,14 @@ function App() {
           if (!cardFound) areAllIn = false;
         });
 
+        // update player points in database, both in GameData and PlayerData
+        // update gameData to show that the game is over
         if (areAllIn) {
           console.log("You won!");
         } else {
           console.log("The cards you selected were not in the game. -1 points");
         }
       }
-
-      // Todo: check if all the users answers are correct and update the game state
     }
   }
 

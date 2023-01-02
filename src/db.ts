@@ -7,7 +7,12 @@ import {
   updateDoc,
   collection,
 } from "firebase/firestore";
-import { GameData, PlayerData, PlayableKanji } from "./GameData";
+import {
+  GameData,
+  PlayerData,
+  PlayableKanji,
+  PlayerPoints,
+} from "./interfaces/GameData";
 import testData from "./testData.json";
 
 // Game functions
@@ -65,8 +70,8 @@ export async function joinGame(
     };
 
     // Push playerUID to players array
-    let players: Array<string> = gameData.players;
-    players.push(playerUID);
+    let players: Array<PlayerPoints> = gameData.players;
+    players.push({ playerUID: playerUID, points: 0 });
     let uniquePlayers = [...new Set(players)];
     gameData.players = uniquePlayers;
     await updateDoc(gameRef, {
@@ -109,6 +114,7 @@ export async function joinGame(
     await setDoc(playerRef, {
       playerUID: playerUID,
       cards: playerCards,
+      points: 0,
     }).catch(() => {
       return Promise.reject("Error joining game");
     });

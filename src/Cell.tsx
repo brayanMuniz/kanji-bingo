@@ -1,7 +1,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { PlayableKanji } from "./GameData";
+import { PlayableKanji } from "./interfaces/GameData";
 
 export type CellProps = {
   onCellClick: (row: number, column: number, cellData: PlayableKanji) => void;
