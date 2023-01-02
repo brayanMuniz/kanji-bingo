@@ -119,7 +119,6 @@ function App() {
           console.log("You won!");
           setLoading(false);
         } else {
-          
           updatedPlayerData.cards.forEach((card) => {
             if (!gameData.playedCards.includes(card.id))
               card.isSelected = false;

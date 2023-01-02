@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import { PlayableKanji } from "./interfaces/GameData";
@@ -15,25 +15,28 @@ export const Cell = (props: CellProps) => {
   const [selected, setSelected] = React.useState<boolean>(
     props.cellData.isSelected
   );
+
+  useEffect(() => {
+    setSelected(props.cellData.isSelected);
+  }, [props]);
+
   let displayText = "";
-  if (props.cellData) {
-    let meaningCorrect = "";
-    let readingCorrect = "";
+  let meaningCorrect = "";
+  let readingCorrect = "";
 
-    props.cellData.meanings.forEach((meaning) => {
-      if (meaning.accepted_answer && meaning.primary) {
-        meaningCorrect = meaning.meaning;
-      }
-    });
+  props.cellData.meanings.forEach((meaning) => {
+    if (meaning.accepted_answer && meaning.primary) {
+      meaningCorrect = meaning.meaning;
+    }
+  });
 
-    props.cellData.readings.forEach((reading) => {
-      if (reading.accepted_answer && reading.primary) {
-        readingCorrect = reading.reading;
-      }
-    });
+  props.cellData.readings.forEach((reading) => {
+    if (reading.accepted_answer && reading.primary) {
+      readingCorrect = reading.reading;
+    }
+  });
 
-    displayText = meaningCorrect + " " + readingCorrect;
-  }
+  displayText = meaningCorrect + " " + readingCorrect;
 
   function toggleClick(row: number, column: number, cellData: PlayableKanji) {
     props.onCellClick(row, column, cellData);
