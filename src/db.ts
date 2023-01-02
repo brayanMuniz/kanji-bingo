@@ -170,3 +170,47 @@ export async function updateSelectedCard(
       "Error updating selected card, player document does not exist"
     );
 }
+
+export async function setAllPlayerCards(
+  gameID: string,
+  playerUID: string,
+  cards: PlayableKanji[]
+) {
+  const playerRef = doc(db, "games", gameID, "players", playerUID);
+  const docSnap = await getDoc(playerRef);
+  if (docSnap.exists()) {
+    await updateDoc(playerRef, {
+      cards: cards,
+    }).catch(() => {
+      return Promise.reject("Error setting player cards");
+    });
+  } else
+    return Promise.reject(
+      "Error setting player cards, player document does not exist"
+    );
+}
+
+export async function updatePlayerPoints(
+  gameID: string,
+  playerUID: string,
+  points: 1 | -1
+) {
+  const playerRef = doc(db, "games", gameID, "players", playerUID);
+  const docSnap = await getDoc(playerRef);
+  if (docSnap.exists()) {
+    let playerPoints: number = docSnap.data().points | 0;
+    playerPoints += points;
+    await updateDoc(playerRef, {
+      points: playerPoints,
+    }).catch(() => {
+      return Promise.reject("Error updating player points");
+    });
+  } else
+    return Promise.reject(
+      "Error updating player points, player document does not exist"
+    );
+}
+
+export async function setNewPlayerCards() {
+  // TODO
+}

@@ -1,11 +1,17 @@
 import "./App.css";
 import React from "react";
-import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
+import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 import { Board } from "./Board";
 import { GameDisplay } from "./GameDisplay";
-import { createGame, joinGame, updateSelectedCard } from "./db";
+import {
+  createGame,
+  joinGame,
+  updateSelectedCard,
+  updatePlayerPoints,
+  setAllPlayerCards,
+} from "./db";
 import { GameData, PlayerData, PlayableKanji } from "./interfaces/GameData";
 
 function App() {
@@ -16,6 +22,9 @@ function App() {
   // Game data
   const [gameID, setGameID] = React.useState<string | null>(null);
   const [gameData, setGameData] = React.useState<GameData | null>(null);
+
+  // Loading state
+  const [loading, setLoading] = React.useState<boolean>(true);
 
   // Error state
   const [error, setError] = React.useState<boolean>(false);
@@ -29,36 +38,47 @@ function App() {
         .then((data) => {
           setUID(data.user.uid);
         })
-        .catch((error) => {
+        .catch(() => {
           setError(true);
         });
     }
   });
 
   async function startGame() {
-    if (userUID)
+    if (userUID) {
+      setLoading(true);
       await createGame(5, 5, userUID)
         .then(async (res: GameData) => {
-          setGameID(res.gameID);
           setGameData(res);
+          setGameID(res.gameID);
           await joinGame(res.gameID, userUID).then(() => {
             console.log("Joined game", res.gameID);
+            setLoading(false);
           });
         })
         .catch((err) => {
           console.log(err);
         });
+    }
   }
 
   async function joinGameBtn(gameID: string) {
-    if (userUID && gameID)
-      await joinGame(gameID, userUID).then((res: [GameData, PlayerData]) => {
-        setGameID(gameID);
-        setGameData(res[0]);
-        setPlayerData(res[1]);
-        console.log("Joined game", gameID);
-        console.log("Player data", res[1]);
-      });
+    if (userUID && gameID) {
+      setLoading(true);
+      await joinGame(gameID, userUID)
+        .then((res: [GameData, PlayerData]) => {
+          setGameID(gameID);
+          setGameData(res[0]);
+          setPlayerData(res[1]);
+          console.log("Joined game", gameID);
+          console.log("Player data", res[1]);
+        })
+        .catch((err) => {
+          console.log(err);
+          setError(true);
+        });
+      setLoading(false);
+    }
   }
 
   async function updateCard(cardData: PlayableKanji) {
@@ -75,6 +95,7 @@ function App() {
         console.log(err);
       });
 
+      // Make this into a function
       // Check if the user has won
       let allClicked = true;
       updatedPlayerData.cards.forEach((card) => {
@@ -82,6 +103,7 @@ function App() {
       });
 
       if (allClicked) {
+        setLoading(true);
         let areAllIn = true;
         gameData.playedCards.forEach((id) => {
           let cardFound = false;
@@ -95,8 +117,19 @@ function App() {
         // update gameData to show that the game is over
         if (areAllIn) {
           console.log("You won!");
+          setLoading(false);
         } else {
+          
+          updatedPlayerData.cards.forEach((card) => {
+            if (!gameData.playedCards.includes(card.id))
+              card.isSelected = false;
+          });
+          await updatePlayerPoints(gameID, userUID, -1);
+          await setAllPlayerCards(gameID, userUID, updatedPlayerData.cards);
+          setPlayerData(updatedPlayerData);
+
           console.log("The cards you selected were not in the game. -1 points");
+          setLoading(false);
         }
       }
     }
@@ -121,7 +154,7 @@ function App() {
     );
   }
 
-  if (!playerData) {
+  if (!playerData && loading) {
     return <div>Loading your data...</div>;
   }
 
@@ -151,6 +184,7 @@ function App() {
         <div>gameID: {gameID}</div>
       </div>
     );
+
   return <div>Something went wrong</div>;
 }
 
