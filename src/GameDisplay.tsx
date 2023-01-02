@@ -24,7 +24,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
       setCurrentCardIdx(0);
       setPlayedCards([selectedCard.id]);
       setCurrentDisplay(selectedCard.characters);
-      // updatePlayedCards(props.gameID, selectedCard.id);
+      updatePlayedCards(props.gameID, selectedCard.id);
     } else {
       const selectedCardId: number =
         props.playedCards[props.playedCards.length - 1];
@@ -61,33 +61,43 @@ export const GameDisplay = (props: GameDisplayProps) => {
   }
 
   function onNextClick(): void {
-    let currentIdx: number = currentCardIdx;
-    currentIdx++;
-    setCurrentCardIdx(currentIdx);
+    const max: number = props.intialCards.length;
+    console.log(currentCardIdx, max);
 
-    // Select random card from intialCards
-    if (currentIdx === playedCards.length) {
-      let idNotSelectedYet: number = -1;
-      while (idNotSelectedYet === -1) {
-        let randomIdx = Math.floor(Math.random() * props.intialCards.length);
-        const selectedCard: initialKanjiData = props.intialCards[randomIdx];
-        if (!props.playedCards.includes(selectedCard.id))
-          idNotSelectedYet = selectedCard.id;
-      }
-
-      let newDisplay: string = getDisplayFromCardId(idNotSelectedYet);
-      setCurrentDisplay(newDisplay);
-
-      // Add card to playedCards
-      let playedCardsCopy = playedCards;
-      playedCardsCopy.push(idNotSelectedYet);
-      setPlayedCards(playedCardsCopy);
-      updatePlayedCards(props.gameID, idNotSelectedYet);
-      console.log("Added brand new card");
+    if (currentCardIdx > max - 1) {
+      console.log("Maxed out on random selection");
     } else {
-      let nextId: number = playedCards[currentIdx];
-      console.log(nextId, "nextId");
-      setCurrentDisplay(getDisplayFromCardId(nextId));
+      let currentIdx: number = currentCardIdx;
+      currentIdx++;
+      setCurrentCardIdx(currentIdx);
+
+      // Select random card from intialCards
+      if (currentIdx === playedCards.length) {
+        let temp: initialKanjiData[] = props.intialCards;
+        let idNotSelectedYet = -1;
+        while (temp.length > 0) {
+          let randomIdx = Math.floor(Math.random() * temp.length);
+          const selectedCard: initialKanjiData = temp[randomIdx];
+          if (!props.playedCards.includes(selectedCard.id)) {
+            idNotSelectedYet = selectedCard.id;
+            let newDisplay: string = selectedCard.characters;
+            setCurrentDisplay(newDisplay);
+            break;
+          }
+          temp.splice(randomIdx, 1);
+        }
+
+        // Add card to playedCards
+        let playedCardsCopy = playedCards;
+        playedCardsCopy.push(idNotSelectedYet);
+        setPlayedCards(playedCardsCopy);
+        updatePlayedCards(props.gameID, idNotSelectedYet);
+        console.log("Added brand new card");
+      } else {
+        let nextId: number = playedCards[currentIdx];
+        console.log(nextId, "nextId");
+        setCurrentDisplay(getDisplayFromCardId(nextId));
+      }
     }
 
     props.onChangeDisplayClick("Play Next");

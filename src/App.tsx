@@ -146,7 +146,7 @@ function App() {
       <div className="App">
         Join a game or create a new one
         <button onClick={startGame}>Create Game</button>
-        <button onClick={() => joinGameBtn("Dm0l7uV7buyRVpV6RDJV")}>
+        <button onClick={() => joinGameBtn("GNHOONGS0WYk844QQbTJ")}>
           Join Test Game
         </button>
       </div>
