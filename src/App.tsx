@@ -62,15 +62,13 @@ function App() {
   }
 
   async function updateCard(cardData: PlayableKanji) {
-    if (userUID && gameID && playerData) {
+    if (userUID && gameID && playerData && gameData) {
       // Update the local data
-      let newPlayerData: PlayerData = playerData;
-      newPlayerData.cards.forEach((card) => {
-        if (card.id === cardData.id) {
-          card.isSelected = !card.isSelected;
-        }
+      let updatedPlayerData: PlayerData = playerData;
+      updatedPlayerData.cards.forEach((card) => {
+        if (card.id === cardData.id) card.isSelected = !card.isSelected;
       });
-      setPlayerData(newPlayerData);
+      setPlayerData(updatedPlayerData);
 
       // Update the database
       await updateSelectedCard(gameID, userUID, cardData.id).catch((err) => {
@@ -79,10 +77,26 @@ function App() {
 
       // Check if the user has won
       let allClicked = true;
-      newPlayerData.cards.forEach((card) => {
+      updatedPlayerData.cards.forEach((card) => {
         if (!card.isSelected) allClicked = false;
       });
-      if (allClicked) console.log("you won");
+
+      if (allClicked) {
+        let areAllIn = true;
+        gameData.playedCards.forEach((id) => {
+          let cardFound = false;
+          updatedPlayerData.cards.forEach((card) => {
+            if (card.id === id) cardFound = true;
+          });
+          if (!cardFound) areAllIn = false;
+        });
+
+        if (areAllIn) {
+          console.log("You won!");
+        } else {
+          console.log("The cards you selected were not in the game. -1 points");
+        }
+      }
 
       // Todo: check if all the users answers are correct and update the game state
     }
@@ -108,7 +122,7 @@ function App() {
   }
 
   if (!playerData) {
-    return <div>Loading yoru data...</div>;
+    return <div>Loading your data...</div>;
   }
 
   // If the user is logged in, render the Board component
