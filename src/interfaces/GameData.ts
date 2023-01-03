@@ -1,3 +1,5 @@
+import { DocumentSnapshot } from "firebase/firestore";
+
 export interface KanjiData {
   kanji: string;
   id: number;
@@ -37,4 +39,17 @@ export interface GameData {
   playedCards: number[]; // IDs of played cards
   players: PlayerPoints[];
   gameStarted: boolean;
+}
+
+export function getGameDataFromDocSnap(docSnap: DocumentSnapshot): GameData {
+  return {
+    gameID: docSnap.id,
+    rows: docSnap.data()?.rows,
+    cols: docSnap.data()?.cols,
+    hostUID: docSnap.data()?.hostUID,
+    intialCards: docSnap.data()?.intialCards,
+    playedCards: docSnap.data()?.playedCards,
+    players: docSnap.data()?.players,
+    gameStarted: docSnap.data()?.gameStarted,
+  };
 }
