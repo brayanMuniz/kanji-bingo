@@ -51,14 +51,21 @@ function App() {
         .then(async (res: GameData) => {
           setGameData(res);
           setGameID(res.gameID);
-          await joinGame(res.gameID, userUID).then(() => {
-            console.log("Joined game", res.gameID);
-            setLoading(false);
-          });
+          await joinGame(res.gameID, userUID)
+            .then((playerRes: [GameData, PlayerData]) => {
+              setPlayerData(playerRes[1]);
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.log(err);
+              setError(true);
+            });
         })
         .catch((err) => {
           console.log(err);
+          setError(true);
         });
+      setLoading(false);
     }
   }
 
@@ -184,7 +191,7 @@ function App() {
       </div>
     );
 
-  return <div>Something went wrong</div>;
+  return <div>Something Went Wrong</div>;
 }
 
 export default App;
