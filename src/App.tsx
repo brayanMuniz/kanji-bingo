@@ -88,7 +88,7 @@ function App() {
     }
   }
 
-  async function updateCard(cardData: PlayableKanji) {
+  async function updatePlayerCard(cardData: PlayableKanji) {
     if (userUID && gameID && playerData && gameData) {
       // Update the local data
       let updatedPlayerData: PlayerData = playerData;
@@ -155,7 +155,7 @@ function App() {
       <div className="App">
         Join a game or create a new one
         <button onClick={startGame}>Create Game</button>
-        <button onClick={() => joinGameBtn("GNHOONGS0WYk844QQbTJ")}>
+        <button onClick={() => joinGameBtn("jqsUAcwsxncmGmJA3xlI")}>
           Join Test Game
         </button>
       </div>
@@ -176,15 +176,13 @@ function App() {
           intialCards={gameData.intialCards}
           playedCards={gameData.playedCards}
           userUID={userUID}
-          onChangeDisplayClick={(type) => {
-            console.log(type);
-          }}
+          onChangeDisplayClick={() => {}}
         ></GameDisplay>
 
         <Board
           kanjiData={playerData.cards}
           onCellClick={(row, col, cardData) => {
-            updateCard(cardData);
+            updatePlayerCard(cardData);
           }}
         ></Board>
 

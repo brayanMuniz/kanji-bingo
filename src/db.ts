@@ -126,7 +126,7 @@ export async function updatePlayedCards(gameID: string, newId: number) {
   const gameRef = doc(db, "games", gameID);
   const docSnap = await getDoc(gameRef);
   if (docSnap.exists()) {
-    let playedCards: any[] = docSnap.data().playedCards;
+    let playedCards: number[] = docSnap.data().playedCards;
     playedCards.push(newId);
     await updateDoc(gameRef, {
       playedCards: playedCards,

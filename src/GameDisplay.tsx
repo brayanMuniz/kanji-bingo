@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { updatePlayedCards } from "./db";
 import { initialKanjiData } from "./interfaces/GameData";
 
@@ -13,8 +13,19 @@ export type GameDisplayProps = {
 
 export const GameDisplay = (props: GameDisplayProps) => {
   const [currentDisplay, setCurrentDisplay] = React.useState<string>("");
-  const [currentCardIdx, setCurrentCardIdx] = React.useState<number>(0);
-  const [playedCards, setPlayedCards] = React.useState<number[]>([]);
+  const [currentCardIdx, setCurrentCardIdx] = React.useState<number>(
+    props.playedCards.length
+  );
+  const [playedCards, setPlayedCards] = React.useState<number[]>(
+    props.playedCards
+  );
+  const [maxAmountOfCards, setMaxAmountOfCards] = React.useState<number>(
+    props.intialCards.length
+  );
+
+  function isUserHostUser(): boolean {
+    return props.hostUID === props.userUID;
+  }
 
   if (currentDisplay === "") {
     if (props.playedCards.length === 0) {
@@ -36,10 +47,6 @@ export const GameDisplay = (props: GameDisplayProps) => {
     }
   }
 
-  function isUserHostUser(): boolean {
-    return props.hostUID === props.userUID;
-  }
-
   function getDisplayFromCardId(id: number): string {
     let display: string = "";
     props.intialCards.forEach((card) => {
@@ -50,6 +57,7 @@ export const GameDisplay = (props: GameDisplayProps) => {
     return display;
   }
 
+  // ! Err: when I go back on idx, sometimes it goes back to a random idx, ex: 6 to 22
   function onShowPreviousClick(): void {
     let currentIdx: number = currentCardIdx;
     if (currentIdx > 0) currentIdx--;
@@ -61,15 +69,14 @@ export const GameDisplay = (props: GameDisplayProps) => {
   }
 
   function onNextClick(): void {
-    const max: number = props.intialCards.length;
-    console.log(currentCardIdx, max);
-
+    const max: number = maxAmountOfCards;
     if (currentCardIdx > max - 1) {
       console.log("Maxed out on random selection");
     } else {
       let currentIdx: number = currentCardIdx;
       currentIdx++;
       setCurrentCardIdx(currentIdx);
+      console.log(currentCardIdx, max);
 
       // Select random card from intialCards
       if (currentIdx === playedCards.length) {
