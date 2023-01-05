@@ -10,8 +10,9 @@ import {
 import {
   GameData,
   PlayerData,
-  PlayableKanji,
   PlayerPoints,
+  PlayableKanji,
+  getGameDataFromDocSnap,
 } from "./interfaces/GameData";
 import testData from "./testData.json";
 
@@ -58,28 +59,10 @@ export async function joinGame(
   const gameRef = doc(db, "games", gameID);
   const docSnap = await getDoc(gameRef);
   if (docSnap.exists()) {
-    const gameData: GameData = {
-      gameID: gameID,
-      rows: docSnap.data().row,
-      cols: docSnap.data().col,
-      hostUID: docSnap.data().hostUID,
-      intialCards: docSnap.data().intialCards,
-      playedCards: docSnap.data().playedCards, // ids only, refer back to intialCards
-      players: docSnap.data().players,
-      gameStarted: docSnap.data().gameStarted,
-    };
+    const gameData: GameData = getGameDataFromDocSnap(docSnap);
 
-    // Push playerUID to players array
-    let players: Array<PlayerPoints> = gameData.players;
-    players.push({ playerUID: playerUID, points: 0 });
-    let uniquePlayers = [...new Set(players)];
-    gameData.players = uniquePlayers;
-    await updateDoc(gameRef, {
-      players: uniquePlayers,
-    });
-
-    let rowByCol: number = docSnap.data()?.rows * docSnap.data()?.cols;
-    let initialCards = docSnap.data()?.intialCards;
+    let initialCards = gameData.intialCards;
+    let rowByCol: number = gameData.rows * gameData.cols;
 
     // if player aleady exists, return player data
     const playerRef = doc(db, "games", gameID, "players", playerUID);
@@ -91,45 +74,59 @@ export async function joinGame(
       };
       return [gameData, playerData];
     }
+    // Todo check this to see if its correct
+    else {
+      // Add playerPoints to gameData
+      let playerIsInGame = gameData.players.find(
+        (player) => player.playerUID === playerUID
+      );
+      let players: Array<PlayerPoints> = gameData.players;
+      players.push({ playerUID: playerUID, points: 0 });
+      let uniquePlayers = [...new Set(players)];
+      gameData.players = uniquePlayers;
+      await updateDoc(gameRef, {
+        players: uniquePlayers,
+      });
 
-    // set player cards to random cards from initialCards
-    let playerCards: PlayableKanji[] = [];
-    while (playerCards.length < rowByCol) {
-      let randomIndex = Math.floor(Math.random() * initialCards.length);
-      let temp = {
-        id: initialCards[randomIndex].id,
-        meanings: initialCards[randomIndex].meanings,
-        readings: initialCards[randomIndex].readings,
-        isSelected: false,
+      // set player cards to random cards from initialCards
+      let playerCards: PlayableKanji[] = [];
+      while (playerCards.length < rowByCol) {
+        let randomIndex = Math.floor(Math.random() * initialCards.length);
+        let temp = {
+          id: initialCards[randomIndex].id,
+          meanings: initialCards[randomIndex].meanings,
+          readings: initialCards[randomIndex].readings,
+          isSelected: false,
+        };
+        playerCards.push(temp);
+        initialCards.splice(randomIndex, 1);
+      }
+
+      const playerData: PlayerData = {
+        playerUID: playerUID,
+        cards: playerCards,
       };
-      playerCards.push(temp);
-      initialCards.splice(randomIndex, 1);
+
+      await setDoc(playerRef, {
+        playerUID: playerUID,
+        cards: playerCards,
+        points: 0,
+      }).catch(() => {
+        return Promise.reject("Error joining game");
+      });
+
+      return [gameData, playerData];
     }
-
-    const playerData: PlayerData = {
-      playerUID: playerUID,
-      cards: playerCards,
-    };
-
-    await setDoc(playerRef, {
-      playerUID: playerUID,
-      cards: playerCards,
-      points: 0,
-    }).catch(() => {
-      return Promise.reject("Error joining game");
-    });
-
-    return [gameData, playerData];
   }
 
-  return Promise.reject("Error joining game");
+  return Promise.reject("Error joining game, game does not exist");
 }
 
 export async function updatePlayedCards(gameID: string, newId: number) {
   const gameRef = doc(db, "games", gameID);
   const docSnap = await getDoc(gameRef);
   if (docSnap.exists()) {
-    let playedCards: any[] = docSnap.data()?.playedCards;
+    let playedCards: any[] = docSnap.data().playedCards;
     playedCards.push(newId);
     await updateDoc(gameRef, {
       playedCards: playedCards,
@@ -195,13 +192,38 @@ export async function updatePlayerPoints(
   playerUID: string,
   points: 1 | -1
 ) {
+  const gameRef = doc(db, "games", gameID);
+  const gameDocSnap = await getDoc(gameRef);
+  if (gameDocSnap.exists()) {
+    let players: PlayerPoints[] = gameDocSnap.data().players;
+    let player = players.find((player) => player.playerUID === playerUID);
+    if (!player)
+      return Promise.reject(
+        "Error updating player points, player does not exist"
+      );
+    let newPlayerPoints: number = player.points | 0;
+    newPlayerPoints += points;
+    player.points = newPlayerPoints;
+    players = players.map((player) =>
+      player.playerUID === playerUID ? player : player
+    );
+    await updateDoc(gameRef, {
+      players: players,
+    }).catch(() => {
+      return Promise.reject("Error updating player points, game document");
+    });
+  } else
+    return Promise.reject(
+      "Error updating player points, game document does not exist"
+    );
+
   const playerRef = doc(db, "games", gameID, "players", playerUID);
   const docSnap = await getDoc(playerRef);
   if (docSnap.exists()) {
-    let playerPoints: number = docSnap.data().points | 0;
-    playerPoints += points;
+    let newPlayerPoints: number = docSnap.data().points | 0;
+    newPlayerPoints += points;
     await updateDoc(playerRef, {
-      points: playerPoints,
+      points: newPlayerPoints,
     }).catch(() => {
       return Promise.reject("Error updating player points");
     });

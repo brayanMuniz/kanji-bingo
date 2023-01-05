@@ -111,6 +111,7 @@ function App() {
 
       if (allClicked) {
         setLoading(true);
+        // if allAreIn, the player has won
         let areAllIn = true;
         gameData.playedCards.forEach((id) => {
           let cardFound = false;
@@ -120,9 +121,10 @@ function App() {
           if (!cardFound) areAllIn = false;
         });
 
-        // update player points in database, both in GameData and PlayerData
-        // update gameData to show that the game is over
         if (areAllIn) {
+          await updatePlayerPoints(gameID, userUID, 1);
+          // await setAllPlayerCards(gameID, userUID, updatedPlayerData.cards);
+          // Todo: start a new game
           console.log("You won!");
           setLoading(false);
         } else {
