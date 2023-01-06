@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { updatePlayedCards } from "./db";
 import { initialKanjiData } from "./interfaces/GameData";
 
@@ -95,11 +95,13 @@ export const GameDisplay = (props: GameDisplayProps) => {
         }
 
         // Add card to playedCards
-        let playedCardsCopy = playedCards;
-        playedCardsCopy.push(idNotSelectedYet);
-        setPlayedCards(playedCardsCopy);
-        updatePlayedCards(props.gameID, idNotSelectedYet);
-        console.log("Added brand new card");
+        if (idNotSelectedYet !== -1) {
+          let playedCardsCopy = playedCards;
+          playedCardsCopy.push(idNotSelectedYet);
+          setPlayedCards(playedCardsCopy);
+          updatePlayedCards(props.gameID, idNotSelectedYet);
+          console.log("Added brand new card");
+        }
       } else {
         let nextId: number = playedCards[currentIdx];
         console.log(nextId, "nextId");
