@@ -1,6 +1,7 @@
 import React from "react";
 import { updatePlayedCards } from "./db";
 import { initialKanjiData } from "./interfaces/GameData";
+import { Typography, Grid } from "@mui/material";
 
 export type GameDisplayProps = {
   gameID: string;
@@ -114,11 +115,27 @@ export const GameDisplay = (props: GameDisplayProps) => {
 
   return (
     <div>
-      {isUserHostUser() && (
-        <button onClick={onShowPreviousClick}>Previous</button>
-      )}
-      <h1>{currentDisplay}</h1>
-      {isUserHostUser() && <button onClick={onNextClick}>Next</button>}
+      {/* Todo: reduce the size that the typography takes up, make buttons < and > with mui components  */}
+
+      <Grid
+        direction={"row"}
+        container
+        spacing={0}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Grid item xs={4}>
+          {isUserHostUser() && (
+            <button onClick={onShowPreviousClick}>Previous</button>
+          )}
+        </Grid>
+        <Grid item xs={4}>
+          <Typography variant="h1">{currentDisplay}</Typography>
+        </Grid>
+        <Grid item xs={4}>
+          {isUserHostUser() && <button onClick={onNextClick}>Next</button>}
+        </Grid>
+      </Grid>
     </div>
   );
 };

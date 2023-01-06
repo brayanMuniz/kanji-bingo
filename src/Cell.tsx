@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import { Typography } from "@mui/material";
 import { PlayableKanji } from "./interfaces/GameData";
 
 export type CellProps = {
@@ -25,15 +26,13 @@ export const Cell = (props: CellProps) => {
   let readingCorrect = "";
 
   props.cellData.meanings.forEach((meaning) => {
-    if (meaning.accepted_answer && meaning.primary) {
+    if (meaning.accepted_answer && meaning.primary)
       meaningCorrect = meaning.meaning;
-    }
   });
 
   props.cellData.readings.forEach((reading) => {
-    if (reading.accepted_answer && reading.primary) {
+    if (reading.accepted_answer && reading.primary)
       readingCorrect = reading.reading;
-    }
   });
 
   displayText = meaningCorrect + " " + readingCorrect;
@@ -48,15 +47,20 @@ export const Cell = (props: CellProps) => {
       <Box
         sx={{
           width: "100%",
-          height: "100%",
+          height: "7em",
           backgroundColor: selected ? "#6fbf73" : "primary.main",
           "&:hover": {
             opacity: [0.9, 0.8, 0.7],
           },
         }}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
         onClick={() => toggleClick(props.row, props.column, props.cellData)}
       >
-        {displayText}
+        <Typography variant="body1" fontSize="1.5em">
+          {displayText}
+        </Typography>
       </Box>
     </Grid>
   );
