@@ -113,12 +113,11 @@ function App() {
         setLoading(true);
         // if allAreIn, the player has won
         let areAllIn = true;
-        gameData.playedCards.forEach((id) => {
-          let cardFound = false;
-          updatedPlayerData.cards.forEach((card) => {
-            if (card.id === id) cardFound = true;
-          });
-          if (!cardFound) areAllIn = false;
+        updatedPlayerData.cards.forEach((card) => {
+          if (!gameData.playedCards.includes(card.id)) {
+            areAllIn = false;
+            console.log("The card", card.id, "was not in the game");
+          }
         });
 
         if (areAllIn) {
